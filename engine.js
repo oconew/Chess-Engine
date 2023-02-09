@@ -37,6 +37,9 @@ let getPieceValue = function(piece) {
 let getPositionValue = function (piece, position) {
     // return 0 if square is empty
     if (piece === null) {return 0}
+
+    if (piece.color === 'b') {position = 63-position}
+    
     // find the appropriate piece square table
     let pieceSquareTable
     switch (piece.type) {
