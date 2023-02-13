@@ -112,6 +112,17 @@ let getPositionValue = function (piece, position) {
     return piece.color === 'w' ? pieceSquareTable[position] : -pieceSquareTable[position]
 }
 
+let win_check = function(game) {
+    let eval = 0
+    // Super high evaluation to represent infinity
+    if (game.in_checkmate()) {eval = 1000000000000}
+
+    // negative infinity for white, positive for black
+    return game.turn() === 'w' ? -eval : eval
+
+}
+
+
 let minimaxRoot = function(depth, game, isMaximisingPlayer) {
     // build the game tree apply the minimax search algorithm recursively returning the best move
 
@@ -183,15 +194,6 @@ let minimax = function(depth, game, alpha, beta, isMaximisingPlayer) {
     }
 }
 
-let win_check = function(game) {
-    let eval = 0
-    // Super high evaluation to represent infinity
-    if (game.in_checkmate()) {eval = -1000000000}
-
-    // positive infinity for white, negative for black
-    return game.turn() === 'w' ? eval : -eval
-
-}
 
 let evaluateBoard = function(board, game) {
     // Takes the board representation and returns the evaluated score 
