@@ -1,3 +1,5 @@
+// const e = require("express");
+
 let getPieceValue = function(piece) {
     // absolute material value of the piece
     let absoluteValue = 0
@@ -8,22 +10,22 @@ let getPieceValue = function(piece) {
     // find the appropriate material value of the piece
     switch (piece.type) {
         case 'p':
-            absoluteValue = 1
+            absoluteValue = 10
             break;
         case 'n':
-            absoluteValue = 1
+            absoluteValue = 30
             break;
         case 'b':
-            absoluteValue = 1
+            absoluteValue = 30
             break;
         case 'r':
-            absoluteValue = 1
+            absoluteValue = 50
             break;
         case 'q':
-            absoluteValue = 1
+            absoluteValue = 90
             break;
         case 'k':
-            absoluteValue = 1
+            absoluteValue = 900
             break;
         default:
             return 0
@@ -39,7 +41,7 @@ let getPositionValue = function (piece, position) {
     if (piece === null) {return 0}
 
     if (piece.color === 'b') {position = 63-position}
-    
+
     // find the appropriate piece square table
     let pieceSquareTable
     switch (piece.type) {
@@ -138,12 +140,12 @@ let minimaxRoot = function(depth, game, isMaximisingPlayer) {
 
 let minimax = function(depth, game, alpha, beta, isMaximisingPlayer) {
     // return if the max depth is reached
-    if (depth === 0) {return -evaluateBoard(game.board())}
+    if (depth === 0) {return -evaluateBoard(game.board(), game)}
 
     // black
     if (isMaximisingPlayer) {
         let newGameMoves = game.ugly_moves()
-        let bestEval = -1000
+        let bestEval = -1000000000
 
         // iterate through all child nodes
         for (let i=0; i<newGameMoves.length; i++) {
@@ -181,7 +183,17 @@ let minimax = function(depth, game, alpha, beta, isMaximisingPlayer) {
     }
 }
 
-let evaluateBoard = function(board) {
+let win_check = function(game) {
+    let eval = 0
+    // Super high evaluation to represent infinity
+    if (game.in_checkmate()) {eval = -1000000000}
+
+    // positive infinity for white, negative for black
+    return game.turn() === 'w' ? eval : -eval
+
+}
+
+let evaluateBoard = function(board, game) {
     // Takes the board representation and returns the evaluated score 
 
     // initial score is 0
@@ -190,9 +202,11 @@ let evaluateBoard = function(board) {
     for (let i = 0; i<8; i++) {
         for (let j = 0; j<8; j++) {
             // material evaluation
-            totalEval += getPieceValue(board[i][j])
+            totalEval += getPieceValue(board[i][j])*1.5
             // positional evaluation
             totalEval += getPositionValue(board[i][j], i*8+(j))
+            // win check
+            totalEval += win_check(game)
         }
     }
     return totalEval
@@ -228,19 +242,20 @@ let makeBestMove = function () {
     // Apply the move to the chessboard.js board
     board.position(game.fen());
     // renderMoveHistory(game.history());
-    if (game.game_over()) {
-        alert('Game over');
+    if (game.in_checkmate()) {
+        let winner
+        game.turn === 'w' ? winner = 'White': winner = 'Black'
+        alert(`${winner} wins by checkmate.`);
     }
+    else if (game.in_draw()) {alert('Draw')}
 };
 
 let getBestMove = function (game) {
     // Applies the minimax search tree to the current game state & returns best move
     
     // End game if a player wins or a stalemate is hit
-    if (game.game_over()) {
-        alert('Game over');
-    }
-    let bestMove = minimaxRoot(4, game, true);
+    
+    let bestMove = minimaxRoot(3, game, true);
     return bestMove;
 };
 
